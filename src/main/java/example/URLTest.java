@@ -8,7 +8,6 @@ import java.net.URLConnection;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLPeerUnverifiedException;
 import javax.net.ssl.SSLSession;
 
 /**
@@ -22,13 +21,6 @@ public class URLTest implements HostnameVerifier
 	/** Bypass host name verification */
 	public boolean verify(String hostname, SSLSession session) {
 		System.out.println("Bypassing verification of hostname: " + hostname);
-		try {
-			System.out.println("Peer principal: " + session.getPeerPrincipal().toString());
-		}
-		catch (SSLPeerUnverifiedException e) {
-			System.err.println("Unable to get peer principal");
-			e.printStackTrace();
-		}
 		return true;
 	}
 
@@ -39,20 +31,15 @@ public class URLTest implements HostnameVerifier
 			((HttpsURLConnection) conn).setHostnameVerifier(this);
 		}
 
-		BufferedReader br = null;
-		try {
-			System.out.println("Connecting to URL: " + urlString);
-			conn.connect();
-			System.out.println("Contents of the URL (if any) starting from the next line: ");
-			br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+		System.out.println("Connecting to URL: " + urlString);
+		conn.connect();
+
+		System.out.println("Contents of the URL (if any) starting from the next line: ");
+		try (InputStreamReader isr = new InputStreamReader(conn.getInputStream());
+				BufferedReader br = new BufferedReader(isr)) {
 			String line = null;
 			while ((line = br.readLine()) != null) {
 				System.out.println(line);
-			}
-		}
-		finally {
-			if (br != null) {
-				br.close();
 			}
 		}
 
