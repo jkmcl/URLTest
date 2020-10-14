@@ -1,6 +1,10 @@
 package example;
 
+import static org.junit.Assert.fail;
+
 import java.net.InetAddress;
+
+import javax.net.ssl.SSLHandshakeException;
 
 import org.junit.Test;
 
@@ -17,7 +21,13 @@ public class URLTestTest
 	@Test
 	public void testBadURL() throws Exception {
 		URLTest obj = new URLTest();
-		obj.connect("https://" + InetAddress.getByName(googleHostName).getHostAddress() + "/");
+		String hostname = InetAddress.getByName(googleHostName).getHostAddress().toString();
+		try {
+			obj.connect("https://" + hostname + "/");
+			fail();
+		} catch (SSLHandshakeException e) {
+			System.out.println(e.getMessage());
+		}
 	}
 
 	@Test
